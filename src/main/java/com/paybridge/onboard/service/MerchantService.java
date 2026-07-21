@@ -7,22 +7,54 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.paybridge.onboard.dto.MerchantOnboardRequest;
 import com.paybridge.onboard.dto.MerchantOnboardResponse;
+import com.paybridge.onboard.entity.MerchantEntity;
+import com.paybridge.onboard.repository.MerchantRepository;
+import com.paybridge.onboard.service.helper.MerchantIdGenerator;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class MerchantService {
 
-	@Transactional
+    private final MerchantRepository merchantRepository;
+    
+    private final ApiKeyService apiKeyService;
+    
+    private final MerchantIdGenerator merchantIdGenerator;
+
+    // Wraps both inserts (merchant row + key row) atomically — a failure on
+    // either side rolls back both, so we never end up with a merchant that
+    // has no key to authenticate with.
+    @Transactional
     public MerchantOnboardResponse onboardMerchant(MerchantOnboardRequest request) {
-		String merchantId = "test-merchant-id"; // Replace with actual merchant ID generation logic
+    	log.info("Starting merchant onboarding for business: {}", request.getBusinessName());
+    	
+        String merchantId = merchantIdGenerator.generate();
+        log.info("Generated merchantId: {}", merchantId);
         
-        // Repository save logic here
+        MerchantEntity merchant = MerchantEntity.builder()
+                .merchantId(merchantId)
+                .businessName(request.getBusinessName())
+                .email(request.getEmail())
+                .environment("SANDBOX")
+                .build();
+        log.info("Merchant entity created for merchantId {}: {}", merchantId, merchant);
+
+        Instant createdAt = merchantRepository.save(merchant);
+        log.info("Merchant saved to database at: {}", createdAt);
+        
+        String apiKey = apiKeyService.issueKeyFor(merchantId);
+        
+        log.info("API key issued for merchantId: {}", merchantId);
 
         return MerchantOnboardResponse.builder()
                 .merchantId(merchantId)
-                .apiKey("test-api-key") // Replace with actual API key generation logic
+                .apiKey(apiKey)
                 .environment("SANDBOX")
-                .createdAt(Instant.now())
+                .createdAt(createdAt)
                 .build();
     }
-
 }

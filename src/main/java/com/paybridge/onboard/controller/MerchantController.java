@@ -13,7 +13,9 @@ import com.paybridge.onboard.service.MerchantService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/merchants")
 @RequiredArgsConstructor
@@ -23,7 +25,11 @@ public class MerchantController {
 	@PostMapping
     public ResponseEntity<MerchantOnboardResponse> onboardMerchant(
             @Valid @RequestBody MerchantOnboardRequest request) {
+		log.info("onboardMerchant called with request: {}", request);
+		
         MerchantOnboardResponse response = merchantService.onboardMerchant(request);
+        
+        log.info("Merchant onboarded successfully with merchantId: {}", response.getMerchantId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 	
