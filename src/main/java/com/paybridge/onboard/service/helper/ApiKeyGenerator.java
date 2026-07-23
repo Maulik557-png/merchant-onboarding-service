@@ -5,6 +5,8 @@ import java.util.HexFormat;
 
 import org.springframework.stereotype.Component;
 
+import com.paybridge.onboard.constants.OnboardingConstants;
+
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -16,8 +18,8 @@ public class ApiKeyGenerator {
     private final SecureRandom secureRandom;
 
     public String generate() {
-        byte[] randomBytes = new byte[32]; // 32 bytes = 256 bits
+        byte[] randomBytes = new byte[OnboardingConstants.RAW_KEY_BYTE_LENGTH];
         secureRandom.nextBytes(randomBytes);
-        return "mch_" + HexFormat.of().formatHex(randomBytes);
+        return OnboardingConstants.SANDBOX_KEY_PREFIX + HexFormat.of().formatHex(randomBytes);
     }
 }
