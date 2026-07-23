@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.paybridge.onboard.constants.OnboardingConstants;
 import com.paybridge.onboard.dto.KeyVerifyResponse;
 import com.paybridge.onboard.entity.ApiKeyEntity;
 import com.paybridge.onboard.repository.ApiKeyRepository;
@@ -23,7 +24,7 @@ public class ApiKeyService {
     public String issueKeyFor(String merchantId) {
         String rawKey = apiKeyGenerator.generate();
         String keyHash = apiKeyHasher.hash(rawKey);
-        String keyPrefix = rawKey.substring(0, 16);
+        String keyPrefix = rawKey.substring(0, OnboardingConstants.KEY_PREFIX_DISPLAY_LENGTH);
 
         ApiKeyEntity entity = ApiKeyEntity.builder()
                 .merchantId(merchantId)
@@ -47,7 +48,7 @@ public class ApiKeyService {
         }
 
         ApiKeyEntity entity = found.get();
-        boolean isActive = "ACTIVE".equals(entity.getStatus());
+        boolean isActive = OnboardingConstants.STATUS_ACTIVE.equals(entity.getStatus());
 
         return KeyVerifyResponse.builder()
                 .valid(isActive)

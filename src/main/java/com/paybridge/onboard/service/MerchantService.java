@@ -5,6 +5,7 @@ import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.paybridge.onboard.constants.OnboardingConstants;
 import com.paybridge.onboard.dto.MerchantOnboardRequest;
 import com.paybridge.onboard.dto.MerchantOnboardResponse;
 import com.paybridge.onboard.entity.MerchantEntity;
@@ -39,7 +40,7 @@ public class MerchantService {
                 .merchantId(merchantId)
                 .businessName(request.getBusinessName())
                 .email(request.getEmail())
-                .environment("SANDBOX")
+                .environment(OnboardingConstants.DEFAULT_ENVIRONMENT)
                 .build();
         log.info("Merchant entity created for merchantId {}: {}", merchantId, merchant);
 
@@ -53,7 +54,7 @@ public class MerchantService {
         return MerchantOnboardResponse.builder()
                 .merchantId(merchantId)
                 .apiKey(apiKey)
-                .environment("SANDBOX")
+                .environment(OnboardingConstants.DEFAULT_ENVIRONMENT)
                 .createdAt(createdAt)
                 .build();
     }
